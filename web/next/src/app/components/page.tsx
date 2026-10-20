@@ -1,57 +1,30 @@
 import type { Metadata } from "next"
-import Link from "next/link"
 
+import { ComponentList } from "@/features/components-showcase/component-list"
+import { ComponentsHeader } from "@/features/components-showcase/components-header"
 import { COMPONENTS } from "@/features/components-showcase/registry"
 import { Footer } from "@/features/portfolio/components/footer"
 import { Panel, Separator } from "@/features/portfolio/components/panel"
-import { Tag } from "@/features/portfolio/components/tag"
 
 export const metadata: Metadata = {
   title: "Components",
-  description: "Custom React components I built for this site: 3D, animation and interaction.",
+  description:
+    "Custom React components I built for this site: 3D, voxels, animation and interaction.",
 }
 
 export default function ComponentsPage() {
+  const items = [...COMPONENTS].sort((a, b) =>
+    a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
+  )
+
   return (
     <main className="max-w-screen overflow-x-clip px-2 pt-14">
       <div className="mx-auto md:max-w-3xl">
         <Separator />
         <Panel>
-          <div className="screen-line-bottom p-4">
-            <h1 className="text-3xl font-semibold tracking-tight">
-              Components
-              <sup className="text-muted-foreground top-[-0.75em] ml-1 text-sm font-medium tracking-normal">
-                ({COMPONENTS.length})
-              </sup>
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Custom React components built for this site. Copy the source and use them anywhere.
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2">
-            {COMPONENTS.map(({ slug, name, description, tags, Demo }) => (
-              <Link
-                key={slug}
-                href={`/components/${slug}`}
-                className="group border-line hover:bg-muted/30 flex flex-col border-b transition-colors sm:odd:border-r"
-              >
-                <div className="dot-grid border-line pointer-events-none flex h-48 items-center justify-center overflow-hidden border-b p-4">
-                  <Demo />
-                </div>
-                <div className="space-y-2 p-4">
-                  <p className="font-medium group-hover:underline group-hover:underline-offset-4">
-                    {name}
-                  </p>
-                  <p className="text-muted-foreground line-clamp-2 text-sm">{description}</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {tags.map((t) => (
-                      <Tag key={t}>{t}</Tag>
-                    ))}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <ComponentsHeader count={items.length} view="list" />
+          <ComponentList items={items} />
+          <div className="h-4" />
         </Panel>
         <Separator />
         <Footer />

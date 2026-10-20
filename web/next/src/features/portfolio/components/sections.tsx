@@ -1,6 +1,7 @@
 import { RiArrowRightLine } from "@remixicon/react"
 import Link from "next/link"
 
+import { ComponentList } from "@/features/components-showcase/component-list"
 import { COMPONENTS } from "@/features/components-showcase/registry"
 import { Panel, PanelContent, PanelHeader } from "@/features/portfolio/components/panel"
 import { StackGlobe } from "@/features/portfolio/components/stack-globe"
@@ -127,27 +128,17 @@ export function ComponentsPreview() {
   return (
     <Panel id="components">
       <PanelHeader title="Components" count={COMPONENTS.length} />
-      <div className="grid sm:grid-cols-2">
-        {COMPONENTS.map((c) => (
-          <Link
-            key={c.slug}
-            href={`/components/${c.slug}`}
-            className="group border-line hover:bg-muted/50 flex items-start gap-3 border-b p-4 transition-colors sm:odd:border-r"
-          >
-            <span className="bg-muted border-line flex size-8 shrink-0 items-center justify-center rounded-md border font-mono text-xs">
-              {c.tags.includes("3D") ? "3D" : "</>"}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="font-medium">{c.name}</p>
-              <p className="text-muted-foreground line-clamp-1 text-sm">{c.description}</p>
-            </div>
-          </Link>
-        ))}
+      <div className="pt-4">
+        <div className="screen-line-bottom h-px" />
+        <ComponentList items={COMPONENTS.slice(0, 12)} />
+      </div>
+      <div className="flex justify-center py-4">
         <Link
           href="/components"
-          className="border-line text-muted-foreground hover:text-foreground hover:bg-muted/50 flex items-center justify-center gap-1 border-b p-4 text-sm transition-colors"
+          className="bg-secondary text-secondary-foreground shadow-foreground/20 hover:bg-secondary/80 inline-flex h-8 items-center gap-2 rounded-md pr-2.5 pl-3 text-sm font-medium shadow-[inset_0_0_1px] transition-colors"
         >
-          Explore all <RiArrowRightLine className="size-4" aria-hidden />
+          All components
+          <RiArrowRightLine className="size-4" aria-hidden />
         </Link>
       </div>
     </Panel>

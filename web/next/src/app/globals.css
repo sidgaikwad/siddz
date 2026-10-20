@@ -233,3 +233,18 @@
     transform: translateY(0);
   }
 }
+
+/* drilldown diagram */
+.dd-host .dd-drill {
+  cursor: pointer;
+  outline: none;
+}
+.dd-host .dd-drill :is(rect, polygon, circle, path.basic) {
+  stroke: #38bdf8 !important;
+  stroke-dasharray: 4 3;
+  transition: fill 150ms;
+}
+.dd-host .dd-drill:hover :is(rect, polygon, circle),
+.dd-host .dd-drill:focus-visible :is(rect, polygon, circle) {
+  fill: color-mix(in oklab, #38bdf8 18%, transparent) !important;
+}

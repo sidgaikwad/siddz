@@ -15,7 +15,7 @@ const HAIR = "#111827"
 const SILVER = "#d4d4d8"
 const WOOD = "#a16207"
 
-function Box({ p, s, c, emissive }: { p: V3; s: V3; c: string; emissive?: string }) {
+export function Box({ p, s, c, emissive }: { p: V3; s: V3; c: string; emissive?: string }) {
   return (
     <mesh position={p}>
       <boxGeometry args={s} />
@@ -219,9 +219,11 @@ function Scene({ animate }: { animate: boolean }) {
 // A voxel developer typing at a MacBook, rendered at low resolution and scaled up with hard pixels.
 export function PixelDev({
   pixelScale = 0.34,
+  frameloop = "always",
   className,
 }: {
   pixelScale?: number
+  frameloop?: "always" | "never"
   className?: string
 }) {
   const animate = useMemo(
@@ -234,6 +236,7 @@ export function PixelDev({
     <div className={cn("[&_canvas]:[image-rendering:pixelated]", className)}>
       <Canvas
         orthographic
+        frameloop={frameloop}
         dpr={pixelScale}
         gl={{ antialias: false, alpha: true }}
         camera={{ near: 0.1, far: 100 }}
