@@ -79,7 +79,7 @@
     "defaults"
   ],
   "portless": {
-    "name": "zerostarter",
+    "name": "portfolio",
     "script": "dev:app"
   }
 }
