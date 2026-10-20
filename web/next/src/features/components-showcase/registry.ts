@@ -33,7 +33,7 @@ export const COMPONENTS: ShowcaseItem[] = [
       "Any word as an isometric, extruded block mark. Outlines light up toward your cursor; press it and the letters sink with a metal click.",
     file: "isometric-mark.tsx",
     tags: ["3D", "svg", "sound"],
-    usage: `<IsometricMark text="SIDD" className="max-w-[540px]" />`,
+    usage: `<IsometricMark text="SIDDZ" className="max-w-[540px]" />`,
     features: [
       "Pure SVG: a block font is projected onto an isometric grid, no WebGL needed.",
       "Only true edges get an outline, so letters read as solid shapes, not stacks of cubes.",

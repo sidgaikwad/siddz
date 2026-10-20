@@ -8,7 +8,7 @@ export function ProfileHeader() {
   return (
     <div className="screen-line-bottom border-line border-x">
       <figure className="border-line relative overflow-hidden border-b px-4 pt-8 pb-10 sm:px-10 sm:pt-10 sm:pb-12">
-        <IsometricMark text="SIDD" className="mx-auto max-w-[540px]" />
+        <IsometricMark text="SIDDZ" className="mx-auto max-w-[420px]" />
         <figcaption className="text-muted-foreground/60 pointer-events-none absolute right-3 bottom-2 font-mono text-xs">
           Fig. 1
         </figcaption>

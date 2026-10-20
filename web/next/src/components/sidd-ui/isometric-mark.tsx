@@ -8,6 +8,7 @@ export const GLYPHS: Record<string, string[]> = {
   I: ["###", ".#.", ".#.", ".#.", "###"],
   D: ["###.", "#..#", "#..#", "#..#", "###."],
   G: ["####", "#...", "#.##", "#..#", "####"],
+  Z: ["####", "..##", ".##.", "##..", "####"],
 }
 
 const COS = Math.cos(Math.PI / 6)
@@ -30,7 +31,10 @@ function layout(text: string) {
     glyph.forEach((row, y) => [...row].forEach((c, x) => c === "#" && cells.push([col + x, y])))
     col += (glyph[0]?.length ?? 0) + 1
   }
-  return { cells, cols: col - 1, rows: 5 }
+  const cols = col - 1
+  // Glyph rows run along grid x and columns along -y, so the word reads from south-west to north-east.
+  const grid = cells.map(([c, r]): Cell => [r, cols - 1 - c])
+  return { cells: grid, spanX: 5, spanY: cols }
 }
 
 const p = (x: number, y: number, z: number) =>
@@ -113,7 +117,7 @@ function playMetalClick() {
 export function IsometricMark({ text = "SIDD", className }: { text?: string; className?: string }) {
   const uid = useId().replace(/:/g, "")
   const ids = { pattern: `iso-pattern-${uid}`, glow: `iso-glow-${uid}` }
-  const { cells, cols, rows } = useMemo(() => layout(text), [text])
+  const { cells, spanX, spanY } = useMemo(() => layout(text), [text])
   const svgRef = useRef<SVGSVGElement>(null)
   const glowRef = useRef<SVGRadialGradientElement>(null)
   const [h, setH] = useState(HEIGHT)
@@ -121,12 +125,12 @@ export function IsometricMark({ text = "SIDD", className }: { text?: string; cla
   const motion = useRef({ h: HEIGHT, v: 0, raf: 0 })
 
   const viewBox = useMemo(() => {
-    const minX = p(0, rows, 0)[0] - 2
-    const maxX = p(cols, 0, 0)[0] + 2
+    const minX = p(0, spanY, 0)[0] - 2
+    const maxX = p(spanX, 0, 0)[0] + 2
     const minY = -HEIGHT - 2
-    const maxY = p(cols, rows, 0)[1] + 2
+    const maxY = p(spanX, spanY, 0)[1] + 2
     return { minX, minY, w: maxX - minX, h: maxY - minY }
-  }, [cols, rows])
+  }, [spanX, spanY])
 
   const faces = useMemo(() => buildCells(cells, h), [cells, h])
 
@@ -227,9 +231,9 @@ export function IsometricMark({ text = "SIDD", className }: { text?: string; cla
       </defs>
 
       <g className="stroke-line" strokeWidth="1" strokeDasharray="4 2">
-        <path d={guide(0, rows, 1)} />
-        <path d={guide(0, 0, -1)} />
-        <path d={guide(cols, 0, -1)} />
+        <path d={guide(spanX, 0, -1)} />
+        <path d={guide(0, 0, 1)} />
+        <path d={guide(0, spanY, 1)} />
       </g>
 
       {faces.map((f) => (

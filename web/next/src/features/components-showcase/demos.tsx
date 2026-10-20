@@ -184,5 +184,5 @@ export function IntroLoaderDemo() {
 }
 
 export function IsometricMarkDemo() {
-  return <IsometricMark text="SIDD" className="max-w-sm" />
+  return <IsometricMark text="SIDDZ" className="max-w-sm" />
 }
