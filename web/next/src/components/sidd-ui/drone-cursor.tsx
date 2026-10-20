@@ -1,178 +1,26 @@
 "use client"
 
-import { Canvas, useFrame } from "@react-three/fiber"
+import { Canvas } from "@react-three/fiber"
 import { RiArrowDownSLine, RiGamepadLine } from "@remixicon/react"
 import { cn } from "cn"
 import { useCallback, useEffect, useRef, useState } from "react"
-import * as THREE from "three"
 
-import { Box } from "@/components/sidd-ui/pixel-dev"
+import { DroneMode } from "@/components/sidd-ui/drone-mode"
+import {
+  DroneModel,
+  TRICK_KEYS,
+  createDroneState,
+  queueTrick,
+  stepTrick,
+  type Trick,
+  type TrickQueue,
+} from "@/components/sidd-ui/drone-model"
 import { Button } from "@/components/ui/button"
 import { Kbd } from "@/components/ui/kbd"
 
 const SIZE = 96
 const OFFSET = { x: 34, y: -42 }
-const TRICK_MS = 750
 const STORAGE_KEY = "drone-cursor"
-
-type Trick = "flip-back" | "flip-front" | "roll-left" | "roll-right" | "spin"
-
-const TRICKS: Record<Trick, { axis: "x" | "y" | "z"; dir: 1 | -1; hop: number }> = {
-  "flip-back": { axis: "x", dir: -1, hop: 0.6 },
-  "flip-front": { axis: "x", dir: 1, hop: 0.6 },
-  "roll-left": { axis: "z", dir: 1, hop: 0.2 },
-  "roll-right": { axis: "z", dir: -1, hop: 0.2 },
-  spin: { axis: "y", dir: 1, hop: 0 },
-}
-
-const CONTROLS: { key: string; label: string; trick: Trick }[] = [
-  { key: "Q", label: "Roll left", trick: "roll-left" },
-  { key: "E", label: "Roll right", trick: "roll-right" },
-  { key: "F", label: "Front flip", trick: "flip-front" },
-  { key: "B", label: "Back flip", trick: "flip-back" },
-  { key: "S", label: "Spin", trick: "spin" },
-]
-
-// Shared, mutable state between the DOM follower loop and the three.js scene.
-type DroneState = {
-  asleep: boolean
-  hazard: boolean
-  lit: boolean
-  locked: boolean
-  trick: { angle: number; axis: "x" | "y" | "z"; hop: number } | null
-  vx: number
-  vy: number
-}
-
-function Rotor({
-  p,
-  state,
-  dir,
-}: {
-  p: [number, number, number]
-  state: React.RefObject<DroneState>
-  dir: 1 | -1
-}) {
-  const ref = useRef<THREE.Group>(null)
-  const speed = useRef(1)
-  useFrame((_, delta) => {
-    const target = state.current.asleep ? 0.05 : state.current.trick ? 1.6 : 1
-    speed.current += (target - speed.current) * 0.05
-    if (ref.current) ref.current.rotation.y += dir * delta * 40 * speed.current
-  })
-  return (
-    <group ref={ref} position={p}>
-      <Box p={[0, 0, 0]} s={[1.9, 0.08, 0.28]} c="#a1a1aa" />
-      <Box p={[0, 0, 0]} s={[0.28, 0.08, 1.9]} c="#a1a1aa" />
-    </group>
-  )
-}
-
-function Drone({ state }: { state: React.RefObject<DroneState> }) {
-  const body = useRef<THREE.Group>(null)
-  const stunt = useRef<THREE.Group>(null)
-  const eye = useRef<THREE.MeshStandardMaterial>(null)
-  const led = useRef<THREE.MeshStandardMaterial>(null)
-  const lamp = useRef<THREE.MeshStandardMaterial>(null)
-  const hazards = useRef<(THREE.MeshStandardMaterial | null)[]>([])
-  const sink = useRef(0)
-
-  useFrame(({ clock }) => {
-    const s = state.current
-    const g = body.current
-    if (!g) return
-    const t = clock.elapsedTime
-    sink.current += ((s.asleep ? -1.2 : 0) - sink.current) * 0.04
-    g.position.y = sink.current + (s.asleep ? 0 : Math.sin(t * 3) * 0.15)
-    g.rotation.z = THREE.MathUtils.lerp(
-      g.rotation.z,
-      THREE.MathUtils.clamp(-s.vx * 0.05, -0.6, 0.6),
-      0.2,
-    )
-    g.rotation.x = THREE.MathUtils.lerp(
-      g.rotation.x,
-      THREE.MathUtils.clamp(s.vy * 0.04, -0.5, 0.5),
-      0.2,
-    )
-    if (stunt.current) {
-      stunt.current.rotation.set(0, 0, 0)
-      stunt.current.position.y = 0
-      if (s.trick) {
-        stunt.current.rotation[s.trick.axis] = s.trick.angle
-        stunt.current.position.y = s.trick.hop
-      }
-    }
-    const blink = Math.sin(t * 9) > 0
-    if (eye.current) eye.current.emissiveIntensity = s.asleep ? 0.15 : s.locked ? 3 : 1.2
-    if (led.current) {
-      const c = s.hazard ? "#f59e0b" : s.locked ? "#f59e0b" : "#22c55e"
-      led.current.color.set(c)
-      led.current.emissive.set(c)
-      led.current.emissiveIntensity = Math.sin(t * 8) > 0 ? 2 : 0.2
-    }
-    if (lamp.current) {
-      lamp.current.color.set(s.lit ? "#fef3c7" : "#3f3f46")
-      lamp.current.emissive.set(s.lit ? "#fde68a" : "#000000")
-      lamp.current.emissiveIntensity = s.lit ? 3 : 0
-    }
-    for (const m of hazards.current) {
-      if (!m) continue
-      const on = s.hazard && blink
-      m.color.set(s.hazard ? "#f59e0b" : "#3f3f46")
-      m.emissive.set(on ? "#f59e0b" : "#000000")
-      m.emissiveIntensity = on ? 3 : 0
-    }
-  })
-
-  return (
-    <group ref={body}>
-      <group ref={stunt}>
-        <Box p={[0, 0, 0]} s={[2.2, 0.8, 2.2]} c="#27272a" />
-        <Box p={[0, 0.5, 0]} s={[1.6, 0.25, 1.6]} c="#52525b" />
-        <mesh position={[0, -0.05, 1.12]}>
-          <boxGeometry args={[0.8, 0.5, 0.12]} />
-          <meshStandardMaterial ref={eye} color="#22d3ee" emissive="#22d3ee" flatShading />
-        </mesh>
-        <mesh position={[0, -0.45, 1.0]}>
-          <boxGeometry args={[0.6, 0.18, 0.25]} />
-          <meshStandardMaterial ref={lamp} color="#3f3f46" flatShading />
-        </mesh>
-        <mesh position={[0, 0.7, -0.7]}>
-          <boxGeometry args={[0.3, 0.2, 0.3]} />
-          <meshStandardMaterial ref={led} color="#22c55e" emissive="#22c55e" flatShading />
-        </mesh>
-        {[
-          [1.5, 1.5],
-          [-1.5, 1.5],
-          [1.5, -1.5],
-          [-1.5, -1.5],
-        ].map(([x, z], i) => (
-          <group key={i}>
-            <group rotation={[0, Math.atan2(x!, z!), 0]}>
-              <Box p={[0, 0.1, 1.05]} s={[0.3, 0.22, 1.5]} c="#3f3f46" />
-            </group>
-            <Box p={[x!, 0.25, z!]} s={[0.55, 0.45, 0.55]} c="#18181b" />
-            <mesh position={[x! * 1.22, 0.2, z! * 1.22]}>
-              <boxGeometry args={[0.28, 0.22, 0.28]} />
-              <meshStandardMaterial
-                ref={(m) => {
-                  hazards.current[i] = m
-                }}
-                color="#3f3f46"
-                flatShading
-              />
-            </mesh>
-            <Rotor p={[x!, 0.55, z!]} state={state} dir={i % 2 ? 1 : -1} />
-          </group>
-        ))}
-        {[-0.7, 0.7].map((x) => (
-          <Box key={x} p={[x, -0.65, 0]} s={[0.15, 0.5, 1.6]} c="#3f3f46" />
-        ))}
-        <Box p={[0.6, 0.95, -0.4]} s={[0.08, 0.6, 0.08]} c="#a1a1aa" />
-      </group>
-    </group>
-  )
-}
 
 function readSettings() {
   try {
@@ -224,35 +72,29 @@ function ControlRow({
   )
 }
 
-// A tiny voxel drone that follows the cursor, banks into turns, scans links and naps when idle. Tricks and lights run from the top-right panel or the keyboard; the headlight also switches on over [data-drone-light].
-export function DroneCursor() {
+// A tiny voxel drone that follows the cursor, banks into turns, scans links and naps when idle. Tricks and lights run from the top-right panel or the keyboard; the headlight also switches on over [data-drone-light], and drone mode plays `modeContent` full screen.
+export function DroneCursor({ modeContent }: { modeContent?: React.ReactNode }) {
   const [enabled, setEnabled] = useState(false)
   const [open, setOpen] = useState(false)
   const [parked, setParked] = useState(false)
   const [hazard, setHazard] = useState(false)
   const [light, setLight] = useState(false)
+  const [mode, setMode] = useState(false)
   const wrap = useRef<HTMLDivElement>(null)
   const scan = useRef<SVGPolygonElement>(null)
   const scanSvg = useRef<SVGSVGElement>(null)
   const cone = useRef<SVGPolygonElement>(null)
   const spot = useRef<SVGEllipseElement>(null)
   const coneSvg = useRef<SVGSVGElement>(null)
-  const state = useRef<DroneState>({
-    asleep: false,
-    hazard: false,
-    lit: false,
-    locked: false,
-    trick: null,
-    vx: 0,
-    vy: 0,
-  })
-  const pilot = useRef({
-    current: null as { name: Trick; start: number } | null,
+  const state = useRef(createDroneState())
+  const pilot = useRef<TrickQueue & { lastActive: number; light: boolean; overLight: boolean }>({
+    current: null,
     lastActive: 0,
     light: false,
     overLight: false,
-    queue: [] as Trick[],
+    queue: [],
   })
+  const flying = !parked && !mode
 
   useEffect(() => {
     const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches
@@ -276,9 +118,8 @@ export function DroneCursor() {
   }, [light])
 
   const perform = useCallback((trick: Trick) => {
-    const p = pilot.current
-    if (p.queue.length < 3) p.queue.push(trick)
-    p.lastActive = performance.now()
+    queueTrick(pilot.current, trick)
+    pilot.current.lastActive = performance.now()
   }, [])
 
   const toggleHazard = useCallback(() => {
@@ -292,25 +133,26 @@ export function DroneCursor() {
   }, [])
 
   useEffect(() => {
-    if (!enabled) return
+    if (!enabled || mode) return
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey || e.repeat || e.defaultPrevented) return
       const el = e.target as HTMLElement | null
       if (el?.closest("input, textarea, select, [contenteditable]")) return
       const key = e.key.toUpperCase()
+      if (key === "M" && modeContent) return setMode(true)
       if (key === "P") return setParked((v) => !v)
       if (parked) return
-      const control = CONTROLS.find((c) => c.key === key)
+      const control = TRICK_KEYS.find((c) => c.key === key)
       if (control) perform(control.trick)
       else if (key === "H") toggleHazard()
       else if (key === "L") toggleLight()
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
-  }, [enabled, parked, perform, toggleHazard, toggleLight])
+  }, [enabled, mode, modeContent, parked, perform, toggleHazard, toggleLight])
 
   useEffect(() => {
-    if (!enabled || parked) return
+    if (!enabled || !flying) return
     const p = pilot.current
     const pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2, seen: false }
     const pos = { x: pointer.x, y: pointer.y, vx: 0, vy: 0 }
@@ -350,22 +192,7 @@ export function DroneCursor() {
       s.asleep = now - p.lastActive > 4500
       s.lit = p.light || p.overLight
 
-      if (!p.current && p.queue.length) p.current = { name: p.queue.shift()!, start: now }
-      if (p.current) {
-        const k = Math.min(1, (now - p.current.start) / TRICK_MS)
-        const ease = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2
-        const def = TRICKS[p.current.name]
-        s.trick = {
-          angle: ease * Math.PI * 2 * def.dir,
-          axis: def.axis,
-          hop: Math.sin(Math.PI * k) * def.hop,
-        }
-        p.lastActive = now
-        if (k >= 1) {
-          p.current = null
-          s.trick = null
-        }
-      }
+      if (stepTrick(p, s, now)) p.lastActive = now
 
       opacity += ((pointer.seen ? 1 : 0) - opacity) * 0.08
       if (wrap.current) {
@@ -413,13 +240,17 @@ export function DroneCursor() {
       p.queue = []
       state.current.trick = null
     }
-  }, [enabled, parked])
+  }, [enabled, flying])
 
   if (!enabled) return null
 
   return (
     <>
-      <div className="bg-background/80 fixed top-16 right-4 z-[60] w-52 rounded-lg border backdrop-blur">
+      {mode && <DroneMode onExit={() => setMode(false)}>{modeContent}</DroneMode>}
+      <div
+        hidden={mode}
+        className="bg-background/80 fixed top-16 right-4 z-[60] w-52 rounded-lg border backdrop-blur"
+      >
         <Button
           variant="ghost"
           size="sm"
@@ -436,9 +267,14 @@ export function DroneCursor() {
         </Button>
         {open && (
           <div id="drone-controls" className="space-y-1 border-t p-1">
+            {modeContent && (
+              <div className="border-b pb-1">
+                <ControlRow hotkey="M" label="Drone mode" onClick={() => setMode(true)} />
+              </div>
+            )}
             {!parked && (
               <>
-                {CONTROLS.map((c) => (
+                {TRICK_KEYS.map((c) => (
                   <ControlRow
                     key={c.key}
                     hotkey={c.key}
@@ -472,7 +308,7 @@ export function DroneCursor() {
           </div>
         )}
       </div>
-      {!parked && (
+      {flying && (
         <>
           <svg
             ref={coneSvg}
@@ -523,7 +359,7 @@ export function DroneCursor() {
             >
               <ambientLight intensity={0.9} />
               <directionalLight position={[4, 8, 6]} intensity={1.6} />
-              <Drone state={state} />
+              <DroneModel state={state} />
             </Canvas>
           </div>
         </>
