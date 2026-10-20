@@ -118,7 +118,7 @@ export function Footer() {
         </a>
       </div>
 
-      <div className="relative left-1/2 w-screen -translate-x-1/2 px-2 pt-2">
+      <div data-drone-light className="relative left-1/2 w-screen -translate-x-1/2 px-2 pt-2">
         <DotMatrixWordmark text="SIDDHARTH" />
       </div>
     </footer>
