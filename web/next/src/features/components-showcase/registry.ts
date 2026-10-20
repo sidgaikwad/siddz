@@ -1,6 +1,8 @@
 import {
   DotMatrixWordmarkDemo,
   GardenDemo,
+  AsciiEyeDemo,
+  PixelDevDemo,
   GitHubSkylineDemo,
   IntroLoaderDemo,
   IsometricMarkDemo,
@@ -28,6 +30,46 @@ export type ShowcaseItem = {
 }
 
 export const COMPONENTS: ShowcaseItem[] = [
+  {
+    slug: "pixel-dev",
+    name: "Pixel Dev",
+    description:
+      "A voxel developer in a hoodie typing at a MacBook, with a live code screen, steaming coffee and a plant, rendered as chunky pixel 3D.",
+    file: "pixel-dev.tsx",
+    tags: ["3D", "three.js", "pixel art"],
+    usage: `<PixelDev className="aspect-square w-80" pixelScale={0.34} />`,
+    features: [
+      "Built entirely from boxes with flat shading, no models or textures to download.",
+      "Rendered at about a third of the resolution and scaled up with image-rendering: pixelated.",
+      "The laptop screen is a 64 by 40 canvas of syntax-coloured code that scrolls, with a blinking cursor.",
+      "Hands type in alternation, the head nods along, steam rises and the camera sways around the desk.",
+    ],
+    story: [
+      "I wanted the loader to show me doing the thing I actually do all day, but small and playful rather than a photo.",
+      "Voxels felt right: a little game-like, readable at any size, and very much made by hand.",
+    ],
+    Demo: PixelDevDemo,
+  },
+  {
+    slug: "ascii-eye",
+    name: "ASCII Eye",
+    description:
+      "An almond eye drawn from scrolling text. The iris and pupil follow your cursor, it blinks now and then, and it reports where it is looking.",
+    file: "ascii-eye.tsx",
+    tags: ["canvas", "interaction", "ascii"],
+    usage: `<AsciiEye onStateChange={(s) => console.log(s)} />`,
+    features: [
+      "Every character is placed on a grid inside an almond mask, so the eye is made of the text it shows.",
+      "The pupil eases toward the pointer anywhere on the page, then drifts back to centre when you stop.",
+      "Random blinks close the lids, and a live readout prints pupil coordinates and state.",
+      "Reports tracking, idle or blinking so a status bar can show what the eye is doing.",
+    ],
+    story: [
+      "hancore.dev has a small ASCII eye that watches you while you browse their projects, and it made the page feel alive.",
+      "I wanted my projects section to have that same quiet sense of being seen, built from my own words.",
+    ],
+    Demo: AsciiEyeDemo,
+  },
   {
     slug: "isometric-mark",
     name: "Isometric Mark",
@@ -135,20 +177,20 @@ export const COMPONENTS: ShowcaseItem[] = [
     slug: "intro-loader",
     name: "Intro Loader",
     description:
-      "A full-screen kinetic intro: 3D flipping greetings, a name that flies in from depth, decoding status text, then lifting shutters.",
+      "A centred boot card: a pixelated voxel developer at a MacBook, greetings that wipe left to right at speed, a counter, then one clean lift into the page.",
     file: "intro-loader.tsx",
-    tags: ["animation", "page"],
+    tags: ["animation", "page", "3D"],
     usage: `<IntroLoader words={["Hello", "Bonjour"]} finale="Your Name" />`,
     features: [
-      "One GSAP timeline drives everything, so every beat lands on the same clock and Skip jumps straight to the end.",
-      "Greeting letters roll in and out on 3D cube flips (rotateX around a point behind each glyph) with blur and stagger.",
-      "Stacked text-shadows extrude the letters into solid 3D type without WebGL.",
-      "The name flies in from deep Z with random tilt per letter; the tagline and a status line decode with ScrambleText.",
-      "Six shutters lift from the centre out to reveal the page. Plays per fresh load, skipped for reduced motion.",
+      "One GSAP timeline drives the card, words, counter, status and exit, so everything stays in sync.",
+      "Each word reveals with a clip-path wipe from the left and leaves through the right in about a quarter second.",
+      "The card holds the Pixel Dev voxel scene, rendered at a third of the resolution for crisp hard pixels.",
+      "Exit is a single motion: the card drops away, the screen lifts as one panel and the page zooms into focus.",
+      "Skip jumps to the reveal. Plays per fresh load and is skipped for reduced motion.",
     ],
     story: [
-      "I kept coming back to studio sites whose intros felt like the opening of a film. I wanted that first second on my site to feel intentional too.",
-      "The greetings are the languages I hear around me: Hindi at home in Mumbai, Japanese from the course I am building, and a few more. It ends on my name.",
+      "My first intros were big and cinematic, but they felt like they were about the animation, not about me.",
+      "I pictured something small and calm in the middle of the screen: a tiny pixel version of me at my laptop, a few fast hellos, and then straight into the work.",
     ],
     Demo: IntroLoaderDemo,
   },

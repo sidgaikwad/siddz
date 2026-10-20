@@ -4,6 +4,7 @@ import { RiArrowDownSLine, RiArrowUpSLine } from "@remixicon/react"
 import { cn } from "cn"
 import { useCallback, useEffect, useRef, useState } from "react"
 
+import { AsciiEye, type EyeState } from "@/components/sidd-ui/ascii-eye"
 import type { RepoStats } from "@/features/portfolio/data/github-stats"
 import type { Project } from "@/features/portfolio/data/profile"
 
@@ -56,6 +57,68 @@ function Prompt({ slug, branch }: { slug: string; branch: string }) {
   )
 }
 
+// Dashed strings from the eye's pupil to whatever it is connected to: the selected project and the terminal cursor.
+function EyeStrings({ root }: { root: React.RefObject<HTMLDivElement | null> }) {
+  const svgRef = useRef<SVGSVGElement>(null)
+
+  useEffect(() => {
+    let raf = 0
+    const tick = () => {
+      const el = root.current
+      const svg = svgRef.current
+      if (el && svg) {
+        const box = el.getBoundingClientRect()
+        const marker = el.querySelector("[data-eye-marker]")?.getBoundingClientRect()
+        const targets = [...el.querySelectorAll("[data-eye-target]")].map((t) =>
+          t.getBoundingClientRect(),
+        )
+        const lines = svg.querySelectorAll<SVGLineElement>("line")
+        const ends = svg.querySelectorAll<SVGRectElement>("rect")
+        lines.forEach((line, i) => {
+          const t = targets[i]
+          const visible = marker && t && t.width > 0 && marker.width > 0
+          line.style.opacity = visible ? "1" : "0"
+          ends[i]!.style.opacity = visible ? "1" : "0"
+          if (!visible) return
+          const x1 = marker.left + marker.width / 2 - box.left
+          const y1 = marker.top + marker.height / 2 - box.top
+          const x2 = t.left + t.width / 2 - box.left
+          const y2 = t.top + t.height / 2 - box.top
+          line.setAttribute("x1", x1.toFixed(1))
+          line.setAttribute("y1", y1.toFixed(1))
+          line.setAttribute("x2", x2.toFixed(1))
+          line.setAttribute("y2", y2.toFixed(1))
+          ends[i]!.setAttribute("x", (x2 - 3).toFixed(1))
+          ends[i]!.setAttribute("y", (y2 - 3).toFixed(1))
+        })
+      }
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [root])
+
+  return (
+    <svg
+      ref={svgRef}
+      aria-hidden
+      className="text-muted-foreground pointer-events-none absolute inset-0 z-20 size-full overflow-visible"
+    >
+      {[0, 1].map((i) => (
+        <g key={i} style={{ opacity: i === 0 ? 0.9 : 0.45 }}>
+          <line
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeDasharray="3 3"
+            style={{ opacity: 0 }}
+          />
+          <rect width="6" height="6" fill="none" stroke="currentColor" style={{ opacity: 0 }} />
+        </g>
+      ))}
+    </svg>
+  )
+}
+
 export function ProjectBrowser({
   items,
   totalStars,
@@ -68,6 +131,8 @@ export function ProjectBrowser({
   const [index, setIndex] = useState(0)
   const [active, setActive] = useState(false)
   const [typed, setTyped] = useState(0)
+  const [eye, setEye] = useState<EyeState>("idle")
+  const rootRef = useRef<HTMLDivElement>(null)
   const wheelRef = useRef<HTMLDivElement>(null)
   const drag = useRef<{ y: number } | null>(null)
   const item = items[index]!
@@ -156,6 +221,7 @@ export function ProjectBrowser({
 
   return (
     <div
+      ref={rootRef}
       tabIndex={0}
       onMouseEnter={() => setActive(true)}
       onMouseLeave={() => setActive(false)}
@@ -164,8 +230,19 @@ export function ProjectBrowser({
         if (!e.currentTarget.contains(e.relatedTarget as Node)) setActive(false)
       }}
       aria-label="Project browser. Use arrow keys to change project, Enter to open the repository."
-      className="focus-visible:ring-foreground/30 outline-none focus-visible:ring-1"
+      className="focus-visible:ring-foreground/30 relative outline-none focus-visible:ring-1"
     >
+      <EyeStrings root={rootRef} />
+      <div className="border-line flex items-center justify-between gap-4 border-b px-4 py-3">
+        <div className="text-muted-foreground font-mono text-[11px] leading-relaxed">
+          <p className="text-foreground">fish · ~ · {username}</p>
+          <p>
+            {items.length} projects · {totalStars ?? "-"} stars
+          </p>
+          <p>{items.filter((p) => p.url).length} live</p>
+        </div>
+        <AsciiEye onStateChange={setEye} className="max-sm:[&_pre]:hidden" />
+      </div>
       <div className="grid md:grid-cols-[14rem_1fr]">
         <div
           ref={wheelRef}
@@ -257,7 +334,11 @@ export function ProjectBrowser({
                   >
                     {p.slug}
                   </span>
-                  {d === 0 && <span className="text-foreground ml-auto">▸</span>}
+                  {d === 0 && (
+                    <span data-eye-target className="text-foreground ml-auto">
+                      ▸
+                    </span>
+                  )}
                 </div>
               </button>
             )
@@ -409,7 +490,10 @@ export function ProjectBrowser({
                 )}
                 <Line i={line++}>
                   <span className="text-muted-foreground">› </span>
-                  <span className="bg-foreground inline-block h-3.5 w-2 translate-y-0.5 animate-pulse" />
+                  <span
+                    data-eye-target
+                    className="bg-foreground inline-block h-3.5 w-2 translate-y-0.5 animate-pulse"
+                  />
                 </Line>
               </>
             )}
@@ -430,6 +514,7 @@ export function ProjectBrowser({
           ["project", `${index + 1}/${items.length}`],
           ["stars", totalStars ?? "-"],
           ["shipped", items.filter((p) => p.url).length],
+          ["eye", eye],
         ].map(([label, value]) => (
           <div key={label as string}>
             <p className="text-[10px]">{label}</p>

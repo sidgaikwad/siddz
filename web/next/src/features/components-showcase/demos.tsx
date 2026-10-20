@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic"
 import { useState } from "react"
 
+import { AsciiEye } from "@/components/sidd-ui/ascii-eye"
 import { DotMatrixWordmark } from "@/components/sidd-ui/dot-matrix-wordmark"
 import { Garden } from "@/components/sidd-ui/garden"
 import type { SkylineDay } from "@/components/sidd-ui/github-skyline"
@@ -62,6 +63,19 @@ export function TechGlobeDemo() {
       ]}
     />
   )
+}
+
+const PixelDev = dynamic(() => import("@/components/sidd-ui/pixel-dev").then((m) => m.PixelDev), {
+  ssr: false,
+  loading: Loading,
+})
+
+export function PixelDevDemo() {
+  return <PixelDev className="aspect-square w-64" />
+}
+
+export function AsciiEyeDemo() {
+  return <AsciiEye width={190} height={96} />
 }
 
 const GitHubSkyline = dynamic(
