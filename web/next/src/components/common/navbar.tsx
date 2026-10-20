@@ -21,7 +21,10 @@ export function Navbar() {
   if (pathname?.startsWith("/console") || pathname?.startsWith("/dashboard")) return null
 
   return (
-    <header className="bg-background/80 fixed top-0 left-0 z-50 w-full border-b backdrop-blur">
+    <header
+      data-intro-page
+      className="bg-background/80 fixed top-0 left-0 z-50 w-full border-b backdrop-blur"
+    >
       <div className="mx-auto flex h-14 items-center justify-between gap-4 px-4 md:max-w-3xl md:border-x">
         <Link href="/" className="flex items-center gap-2 font-mono text-sm font-semibold">
           <span className="bg-foreground text-background flex size-7 items-center justify-center rounded-md text-xs">

@@ -1,7 +1,6 @@
 "use client"
 
 import { useGSAP } from "@gsap/react"
-import { cn } from "cn"
 import { gsap } from "gsap"
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin"
 import { useRef, useState } from "react"
@@ -11,7 +10,7 @@ gsap.registerPlugin(useGSAP, ScrambleTextPlugin)
 // Set once the intro has finished, so client-side navigation back to the page does not replay it. A full reload resets it.
 let playedThisLoad = false
 
-const SHUTTERS = 6
+const SHUTTERS = 7
 const STATUSES = ["booting", "resolving deps", "compiling shaders", "hydrating", "ready"]
 const EXTRUDE =
   "0 0.02em 0 #d4d4d8, 0 0.04em 0 #a1a1aa, 0 0.06em 0 #71717a, 0 0.08em 0 #52525b, 0 0.1em 0 #3f3f46, 0 0.12em 0 #27272a, 0 0.22em 0.3em rgba(0,0,0,0.75)"
@@ -53,6 +52,7 @@ export function IntroLoader({
 }) {
   const root = useRef<HTMLDivElement>(null)
   const tl = useRef<gsap.core.Timeline | null>(null)
+  const exitAt = useRef(0)
   const [done, setDone] = useState(
     () => oncePerLoad && typeof window !== "undefined" && playedThisLoad,
   )
@@ -159,6 +159,7 @@ export function IntroLoader({
         .to(q("[data-finale]"), { scale: 1.04, duration: 0.55, ease: "power2.inOut" }, at + 0.85)
 
       const end = at + 1.4
+      exitAt.current = end
 
       // Something always moving: progress, counter, a rotating ring and a decoding status line.
       t.to(q("[data-ring]"), { rotate: 140, duration: end + 0.8, ease: "none" }, 0)
@@ -188,23 +189,41 @@ export function IntroLoader({
         )
       })
 
-      // Exit: content dissolves while the shutters lift from the centre out.
+      // Exit: content dissolves, the blade edges light up, then the shutters lift from the centre out while the page zooms into focus behind them.
+      const page = document.querySelectorAll("[data-intro-page]")
       t.to(
         q("[data-content]"),
-        { opacity: 0, scale: 0.92, filter: "blur(10px)", duration: 0.45, ease: "power2.in" },
+        { opacity: 0, scale: 0.92, filter: "blur(10px)", duration: 0.35, ease: "power2.in" },
         end,
       )
         .to(q("[data-frame]"), { opacity: 0, duration: 0.3 }, end)
+        .to(q("[data-edge]"), { opacity: 1, duration: 0.2 }, end + 0.1)
         .to(
           q("[data-shutter]"),
           {
             yPercent: -100,
-            duration: 0.8,
+            duration: 1.05,
             ease: "expo.inOut",
-            stagger: { each: 0.06, from: "center" },
+            stagger: { each: 0.07, from: "center" },
           },
-          end + 0.1,
+          end + 0.2,
         )
+      if (page.length) {
+        t.fromTo(
+          page,
+          { scale: 0.94, y: 60, opacity: 0, filter: "blur(8px)", transformOrigin: "50% 0%" },
+          {
+            scale: 1,
+            y: 0,
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 1.25,
+            ease: "expo.out",
+            clearProps: "transform,filter,opacity,transformOrigin",
+          },
+          end + 0.35,
+        )
+      }
 
       return () => {
         document.documentElement.style.overflow = ""
@@ -215,7 +234,11 @@ export function IntroLoader({
 
   if (done) return null
 
-  const skip = () => tl.current?.progress(1)
+  // Skipping jumps to the reveal rather than cutting to the end, so the shutters still open onto the page.
+  const skip = () => {
+    const t = tl.current
+    if (t && t.time() < exitAt.current) t.seek(exitAt.current)
+  }
 
   return (
     <div
@@ -225,7 +248,16 @@ export function IntroLoader({
     >
       <div className="absolute inset-0 flex">
         {Array.from({ length: SHUTTERS }, (_, i) => (
-          <div key={i} data-shutter className="-mr-px h-full flex-1 bg-zinc-950" />
+          <div
+            key={i}
+            data-shutter
+            className="relative -mr-px h-full flex-1 border-r border-white/[0.07] bg-gradient-to-b from-zinc-950 via-zinc-950 to-zinc-900 last:border-r-0"
+          >
+            <span
+              data-edge
+              className="absolute inset-x-0 bottom-0 h-px bg-white/80 opacity-0 shadow-[0_0_14px_2px_rgba(255,255,255,0.45)]"
+            />
+          </div>
         ))}
       </div>
 
@@ -239,7 +271,7 @@ export function IntroLoader({
           data-guide-y
           className="absolute inset-y-0 left-1/2 w-px bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.2)_0_4px,transparent_4px_8px)]"
         />
-        <div className="absolute top-1/2 left-1/2 size-[78vmin] -translate-x-1/2 -translate-y-1/2">
+        <div className="absolute top-1/2 left-1/2 size-[115vmin] -translate-x-1/2 -translate-y-1/2">
           <svg data-ring className="size-full" viewBox="0 0 100 100" fill="none">
             <circle
               cx="50"
@@ -265,7 +297,7 @@ export function IntroLoader({
         </div>
 
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative h-[1.3em] w-full text-[clamp(3rem,11vw,8.5rem)] leading-none font-bold tracking-tight">
+          <div className="relative h-[1.3em] w-full text-[clamp(3.5rem,14vw,11rem)] leading-none font-bold tracking-tight">
             {words.map((w) => (
               <div key={w} data-word className="absolute inset-0 opacity-0">
                 <Chars text={w} />
@@ -277,7 +309,7 @@ export function IntroLoader({
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-5">
           <div
             data-finale
-            className="relative h-[1.2em] w-full text-[clamp(3.5rem,15vw,12rem)] leading-none font-black tracking-tighter opacity-0"
+            className="relative h-[1.2em] w-full text-[clamp(4rem,17vw,15rem)] leading-none font-black tracking-tighter opacity-0"
           >
             <Chars text={finale} />
           </div>

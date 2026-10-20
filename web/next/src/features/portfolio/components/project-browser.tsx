@@ -23,6 +23,9 @@ const STEP = 112
 const BAR = 16
 const TYPE_MS = 16
 
+// Fixed precision so server and client serialise identical style strings (avoids hydration mismatches).
+const round = (n: number) => Math.round(n * 100) / 100
+
 function Line({
   i,
   children,
@@ -208,8 +211,8 @@ export function ProjectBrowser({
                 onClick={() => setIndex(i)}
                 className="absolute top-1/2 left-6 w-40 origin-left text-left transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
                 style={{
-                  transform: `translate(${-Math.pow(ad, 1.6) * 9}px, calc(-50% + ${d * STEP}px)) rotate(${d * -4}deg) scale(${1 - Math.min(ad, 3) * 0.1})`,
-                  opacity: hidden ? 0 : 1 - ad * 0.24,
+                  transform: `translate(${round(-Math.pow(ad, 1.6) * 9)}px, calc(-50% + ${d * STEP}px)) rotate(${d * -4}deg) scale(${round(1 - Math.min(ad, 3) * 0.1)})`,
+                  opacity: hidden ? 0 : round(1 - ad * 0.24),
                   zIndex: 10 - ad,
                   pointerEvents: hidden ? "none" : "auto",
                 }}

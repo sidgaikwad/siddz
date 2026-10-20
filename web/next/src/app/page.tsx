@@ -16,41 +16,43 @@ import {
 
 export default function Home() {
   return (
-    <main className="max-w-screen overflow-x-clip px-2 pt-14">
+    <>
       <IntroLoader />
-      <div className="mx-auto md:max-w-3xl [&_[data-slot=panel]]:scroll-mt-22">
-        <Separator />
-        <ProfileHeader />
-        <Separator />
+      <main className="max-w-screen overflow-x-clip px-2 pt-14">
+        <div data-intro-page className="mx-auto md:max-w-3xl [&_[data-slot=panel]]:scroll-mt-22">
+          <Separator />
+          <ProfileHeader />
+          <Separator />
 
-        <Overview />
-        <SocialLinks />
-        <GitHubContributions />
-        <Separator />
+          <Overview />
+          <SocialLinks />
+          <GitHubContributions />
+          <Separator />
 
-        <About />
-        <Separator />
+          <About />
+          <Separator />
 
-        <ComponentsPreview />
-        <Separator />
+          <ComponentsPreview />
+          <Separator />
 
-        <TechStack />
-        <Separator />
+          <TechStack />
+          <Separator />
 
-        <Experiences />
-        <Separator />
+          <Experiences />
+          <Separator />
 
-        <Education />
-        <Separator />
+          <Education />
+          <Separator />
 
-        <ProjectsTerminal />
-        <Separator />
+          <ProjectsTerminal />
+          <Separator />
 
-        <BlogPreview />
-        <Separator />
+          <BlogPreview />
+          <Separator />
 
-        <Footer />
-      </div>
-    </main>
+          <Footer />
+        </div>
+      </main>
+    </>
   )
 }
