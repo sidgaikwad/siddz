@@ -226,6 +226,7 @@ export function DroneCursor() {
           gl={{ antialias: false, alpha: true }}
           camera={{ position: [6, 7, 9], zoom: 13, near: 0.1, far: 50 }}
           onCreated={({ camera }) => camera.lookAt(0, 0, 0)}
+          style={{ pointerEvents: "none" }}
         >
           <ambientLight intensity={0.9} />
           <directionalLight position={[4, 8, 6]} intensity={1.6} />
