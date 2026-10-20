@@ -224,10 +224,6 @@
 }
 
 /* intro loader */
-[data-intro-seen] .intro-loader {
-  display: none;
-}
-
 @keyframes intro-in {
   from {
     transform: translateY(110%);

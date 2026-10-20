@@ -141,7 +141,7 @@ export const COMPONENTS: ShowcaseItem[] = [
       "Words rise into a masked line and leave upward, timed back to back.",
       "Counter and progress line climb together on an ease-out curve.",
       "Curtain lifts with a curved trailing edge, content drifts up as it fades.",
-      "Plays once per browser session; an inline script hides it before first paint on repeat visits.",
+      "Plays on every fresh page load, but not when you navigate back to the page inside the site.",
       "Skipped entirely with reduced motion.",
     ],
     story: [

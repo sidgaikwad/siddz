@@ -178,7 +178,7 @@ export function IntroLoaderDemo() {
       >
         Play intro
       </button>
-      {run > 0 && <IntroLoader key={run} oncePerSession={false} />}
+      {run > 0 && <IntroLoader key={run} oncePerLoad={false} />}
     </>
   )
 }

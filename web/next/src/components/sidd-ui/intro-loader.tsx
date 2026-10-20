@@ -3,7 +3,9 @@
 import { cn } from "cn"
 import { useEffect, useState } from "react"
 
-const STORAGE_KEY = "intro-seen"
+// Set once the intro has finished, so client-side navigation back to the page does not replay it. A full reload resets it.
+let playedThisLoad = false
+
 const WORD_MS = 260
 const FIRST_WORD_MS = 650
 const FINAL_HOLD_MS = 700
@@ -12,25 +14,24 @@ const EXIT_MS = 900
 export function IntroLoader({
   words = ["Hello", "नमस्ते", "こんにちは", "Bonjour", "Hola", "Ciao"],
   finale = "Siddharth Gaikwad",
-  oncePerSession = true,
+  oncePerLoad = true,
 }: {
   words?: string[]
   finale?: string
-  oncePerSession?: boolean
+  oncePerLoad?: boolean
 }) {
   const sequence = [...words, finale]
   const [index, setIndex] = useState(0)
   const [progress, setProgress] = useState(0)
   const [exiting, setExiting] = useState(false)
-  const [done, setDone] = useState(false)
+  const [done, setDone] = useState(
+    () => oncePerLoad && typeof window !== "undefined" && playedThisLoad,
+  )
 
   useEffect(() => {
-    let seen = false
-    try {
-      seen = oncePerSession && sessionStorage.getItem(STORAGE_KEY) === "1"
-    } catch {}
+    if (done) return
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    if (seen || reduced) {
+    if (reduced) {
       setDone(true)
       return
     }
@@ -54,9 +55,7 @@ export function IntroLoader({
       setTimeout(() => {
         setDone(true)
         document.documentElement.style.overflow = ""
-        try {
-          sessionStorage.setItem(STORAGE_KEY, "1")
-        } catch {}
+        if (oncePerLoad) playedThisLoad = true
       }, total + EXIT_MS),
     )
     return () => {
@@ -73,11 +72,6 @@ export function IntroLoader({
 
   return (
     <>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `try{if(${oncePerSession}&&sessionStorage.getItem("${STORAGE_KEY}")==="1")document.documentElement.dataset.introSeen="1"}catch(e){}`,
-        }}
-      />
       <div
         aria-hidden
         className={cn(
