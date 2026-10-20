@@ -8,6 +8,7 @@ import type { Metadata } from "next"
 
 import { InnerProvider, OuterProvider } from "@/app/providers"
 import { Navbar } from "@/components/common/navbar"
+import { DroneCursor } from "@/components/sidd-ui/drone-cursor"
 import { config } from "@/lib/config"
 import { dmSans, jetbrainsMono } from "@/lib/fonts"
 
@@ -71,6 +72,7 @@ export default function RootLayout({
           <InnerProvider>
             <Navbar />
             {children}
+            <DroneCursor />
           </InnerProvider>
           {onVercel && <SpeedInsights />}
         </body>

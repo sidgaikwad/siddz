@@ -1,4 +1,5 @@
 import { IntroLoader } from "@/components/sidd-ui/intro-loader"
+import { Architecture } from "@/features/portfolio/components/architecture"
 import { Footer } from "@/features/portfolio/components/footer"
 import { GitHubContributions } from "@/features/portfolio/components/github-contributions"
 import { Overview, SocialLinks } from "@/features/portfolio/components/overview"
@@ -13,6 +14,7 @@ import {
   Experiences,
   TechStack,
 } from "@/features/portfolio/components/sections"
+import { VoxelLab } from "@/features/portfolio/components/voxel-lab"
 
 export default function Home() {
   return (
@@ -45,6 +47,12 @@ export default function Home() {
           <Separator />
 
           <ProjectsTerminal />
+          <Separator />
+
+          <Architecture />
+          <Separator />
+
+          <VoxelLab />
           <Separator />
 
           <BlogPreview />

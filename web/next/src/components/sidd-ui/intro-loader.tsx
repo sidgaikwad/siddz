@@ -145,7 +145,7 @@ export function IntroLoader({
   // Skipping jumps to the exit rather than cutting to the end, so the page still opens.
   const skip = () => {
     const t = tl.current
-    if (t && t.time() < exitAt.current) t.seek(exitAt.current)
+    if (t && t.time() < exitAt.current) t.seek(exitAt.current, false)
   }
 
   return (

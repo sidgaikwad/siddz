@@ -23,6 +23,7 @@ export type ShowcaseItem = {
   file: string
   tags: string[]
   usage: string
+  isNew?: boolean
   features: string[]
   // Draft copy in first person: rewrite each story in your own words.
   story: string[]
@@ -32,6 +33,7 @@ export type ShowcaseItem = {
 export const COMPONENTS: ShowcaseItem[] = [
   {
     slug: "pixel-dev",
+    isNew: true,
     name: "Pixel Dev",
     description:
       "A voxel developer in a hoodie typing at a MacBook, with a live code screen, steaming coffee and a plant, rendered as chunky pixel 3D.",
@@ -52,6 +54,7 @@ export const COMPONENTS: ShowcaseItem[] = [
   },
   {
     slug: "ascii-eye",
+    isNew: true,
     name: "ASCII Eye",
     description:
       "An almond eye drawn from scrolling text. The iris and pupil follow your cursor, it blinks now and then, and it reports where it is looking.",
@@ -175,6 +178,7 @@ export const COMPONENTS: ShowcaseItem[] = [
   },
   {
     slug: "intro-loader",
+    isNew: true,
     name: "Intro Loader",
     description:
       "A centred boot card: a pixelated voxel developer at a MacBook, greetings that wipe left to right at speed, a counter, then one clean lift into the page.",
