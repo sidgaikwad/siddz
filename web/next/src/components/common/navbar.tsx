@@ -1,250 +1,67 @@
 "use client"
 
-import { features, type Feature, site } from "@packages/config/site"
-import {
-  RiArrowRightUpLine,
-  RiDiscordFill,
-  RiGithubFill,
-  RiMenuLine,
-  RiTwitterXFill,
-} from "@remixicon/react"
+import { features, site } from "@packages/config/site"
+import { RiGithubFill } from "@remixicon/react"
 import { cn } from "cn"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useEffect, useState } from "react"
 
-import { Access } from "@/components/common/access"
 import { ModeToggle } from "@/components/common/mode-toggle"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Spinner } from "@/components/ui/spinner"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { authClient } from "@/lib/auth/client"
-import { isActive } from "@/lib/utils"
 
-const socialLinks = [
-  {
-    href: site.social.discord,
-    icon: RiDiscordFill,
-    label: "Discord",
-  },
-  {
-    href: site.social.github,
-    icon: RiGithubFill,
-    label: "GitHub",
-  },
-  {
-    href: site.social.x,
-    icon: RiTwitterXFill,
-    label: "X",
-  },
+const navLinks = [
+  { href: "/#about", label: "About", hideOnMobile: true },
+  { href: "/#projects", label: "Projects" },
+  { href: "/components", label: "Components" },
+  ...(features.blog ? [{ href: "/blog", label: "Blog" }] : []),
 ]
-
-function SocialLinks({ onClick }: { onClick?: () => void }) {
-  return (
-    <div className="flex items-center gap-5 lg:gap-3">
-      {socialLinks
-        .filter((link) => link.href)
-        .map((link) => (
-          <Tooltip key={link.href}>
-            <TooltipTrigger
-              render={
-                <a
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-foreground/60 hover:text-foreground transition-colors"
-                  aria-label={link.label}
-                  onClick={onClick}
-                />
-              }
-            >
-              <link.icon className="size-6" aria-hidden="true" />
-            </TooltipTrigger>
-            <TooltipContent>{link.label}</TooltipContent>
-          </Tooltip>
-        ))}
-    </div>
-  )
-}
 
 export function Navbar() {
   const pathname = usePathname()
-  const { data: session, isPending } = authClient.useSession()
-
-  const [toDashboard, setToDashboard] = useState(false)
-  const [isOpen, setIsOpen] = useState(false)
-
-  useEffect(() => {
-    setToDashboard(false)
-  }, [pathname])
 
   if (pathname?.startsWith("/console") || pathname?.startsWith("/dashboard")) return null
 
-  // A link with a `feature` is shown only when that feature is enabled; /hire has none, so it always shows (and is stripped from forks by the CLI).
-  const allNavLinks: { href: string; label: string; external?: boolean; feature?: Feature }[] = [
-    { href: "/docs", label: "Documentation", feature: "docs" },
-    { href: "/api/docs", label: "API Docs", external: true, feature: "apiDocs" },
-    { href: "/blog", label: "Blog", feature: "blog" },
-  ]
-  const navLinks = allNavLinks.filter((link) => !link.feature || features[link.feature])
-
   return (
-    <header className="bg-background fixed top-0 left-0 z-50 w-full border-b">
-      <div className="flex min-h-14 items-center justify-between pr-5 pl-3.5">
-        <Link href="/" className="flex items-center gap-2 font-bold">
-          {site.name}
+    <header className="bg-background/80 fixed top-0 left-0 z-50 w-full border-b backdrop-blur">
+      <div className="mx-auto flex h-14 items-center justify-between gap-4 px-4 md:max-w-3xl md:border-x">
+        <Link href="/" className="flex items-center gap-2 font-mono text-sm font-semibold">
+          <span className="bg-foreground text-background flex size-7 items-center justify-center rounded-md text-xs">
+            SG
+          </span>
+          <span className="hidden sm:inline">{site.name}</span>
         </Link>
-        <div className="flex items-center gap-2.5">
-          {/* Desktop Navigation */}
-          <nav aria-label="Main navigation" className="mx-5 hidden items-center gap-8 lg:flex">
-            {navLinks.map((link) => {
-              const active = !link.external && isActive(pathname, link.href, { exact: false })
-              if (link.external) {
-                return (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-foreground/60 hover:text-foreground/80 font-medium transition-colors"
-                  >
-                    {link.label}
-                    <RiArrowRightUpLine className="-mt-3 inline size-3.5" />
-                  </a>
-                )
-              }
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "font-medium transition-colors",
-                    active ? "text-foreground" : "hover:text-foreground/80 text-foreground/60",
-                  )}
-                >
-                  {link.label}
-                </Link>
-              )
-            })}
-          </nav>
-
-          {/* Social Links */}
-          <div className="mr-5 hidden items-center gap-2.5 lg:flex">
-            <SocialLinks />
-          </div>
-
-          {/* Shell paints immediately; only the label fades in once auth resolves, so the box never pops and a logged-in user never sees a flash of Login. */}
-          {isPending ? (
-            <Button
-              className="pointer-events-none w-24"
-              variant="outline"
-              aria-hidden
-              tabIndex={-1}
-            />
-          ) : session?.user ? (
-            <Button
-              role="link"
-              className="w-24"
-              variant="outline"
-              onClick={() => setToDashboard(true)}
-              render={<Link href="/dashboard" />}
-            >
-              {toDashboard ? (
-                <Spinner />
-              ) : (
-                <span className="animate-in fade-in duration-1000">Dashboard</span>
-              )}
-            </Button>
-          ) : (
-            <Access labelClassName="animate-in fade-in duration-1000" />
-          )}
-
-          <div className="lg:-mr-2.5">
-            <ModeToggle />
-          </div>
-
-          {/* Mobile Navigation */}
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger
-              render={
-                <Button
-                  className="-mr-2.5 size-8 lg:hidden [&_svg]:size-4!"
-                  aria-label="Open menu"
-                  size="sm"
-                  variant="outline"
-                />
-              }
-            >
-              <RiMenuLine aria-hidden="true" />
-            </SheetTrigger>
-            <SheetContent side="right">
-              <SheetHeader>
-                <SheetTitle
-                  render={
-                    <Link
-                      href="/"
-                      className="-mt-1 flex items-center gap-2 text-2xl font-bold"
-                      onClick={() => setIsOpen(false)}
-                    />
-                  }
-                >
-                  {site.name}
-                </SheetTitle>
-              </SheetHeader>
-              <nav className="ml-4 flex flex-col gap-5">
-                {navLinks.map((link) => {
-                  const active = !link.external && isActive(pathname, link.href, { exact: false })
-                  if (link.external) {
-                    return (
-                      <a
-                        key={link.href}
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-foreground/60 hover:text-foreground/80 font-medium transition-colors"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        {link.label}
-                        <RiArrowRightUpLine className="-mt-3 inline size-3.5" />
-                      </a>
-                    )
-                  }
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className={cn(
-                        "font-medium transition-colors",
-                        active ? "text-foreground" : "hover:text-foreground/80 text-foreground/60",
-                      )}
-                      onClick={() => setIsOpen(false)}
-                    >
-                      {link.label}
-                    </Link>
-                  )
-                })}
-                {site.social.github && (
-                  <Button
-                    role="link"
-                    size="sm"
-                    className="mt-2 w-fit"
-                    onClick={() => setIsOpen(false)}
-                    render={
-                      <a href={site.social.github} target="_blank" rel="noopener noreferrer" />
-                    }
-                  >
-                    <RiGithubFill className="size-4" />
-                    Get {site.name}
-                  </Button>
+        <div className="flex items-center gap-1">
+          <nav
+            aria-label="Main navigation"
+            className="mr-2 flex items-center gap-3 text-sm sm:gap-4"
+          >
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "transition-colors",
+                  "hideOnMobile" in link && link.hideOnMobile && "max-sm:hidden",
+                  pathname?.startsWith(link.href) && link.href !== "/"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
-              </nav>
-              {/* Mobile Social Links */}
-              <div className="mt-2.5 ml-4 flex items-center gap-2.5">
-                <SocialLinks onClick={() => setIsOpen(false)} />
-              </div>
-            </SheetContent>
-          </Sheet>
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+          {site.social.github && (
+            <a
+              href={site.social.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub"
+              className="text-muted-foreground hover:text-foreground hover:bg-muted flex size-8 items-center justify-center rounded-md transition-colors"
+            >
+              <RiGithubFill className="size-4" />
+            </a>
+          )}
+          <ModeToggle />
         </div>
       </div>
     </header>

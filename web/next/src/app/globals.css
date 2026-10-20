@@ -28,6 +28,7 @@
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
+  --color-line: var(--line);
   --color-destructive: var(--destructive);
   --color-success: var(--success);
   --color-accent-foreground: var(--accent-foreground);
@@ -86,9 +87,11 @@
   --fd-banner-height: 3.5rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+  --line: oklch(0.922 0 0);
 }
 
 .dark {
+  --line: oklch(1 0 0 / 12%);
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -144,5 +147,105 @@
   --fd-banner-height: 0px;
   #nd-page {
     @apply mt-0;
+  }
+}
+
+/* portfolio: full-bleed guide lines and patterns */
+@utility screen-line-top {
+  @apply relative;
+  &:before {
+    content: "";
+    @apply bg-line absolute top-0 left-[-100vw] -z-1 h-px w-[200vw];
+  }
+}
+
+@utility screen-line-bottom {
+  @apply relative;
+  &:after {
+    content: "";
+    @apply bg-line absolute bottom-0 left-[-100vw] -z-1 h-px w-[200vw];
+  }
+}
+
+@utility diagonal-stripes {
+  background-image: repeating-linear-gradient(
+    315deg,
+    color-mix(in oklab, var(--line) 70%, transparent) 0,
+    color-mix(in oklab, var(--line) 70%, transparent) 1px,
+    transparent 0,
+    transparent 50%
+  );
+  background-size: 10px 10px;
+}
+
+@utility dot-grid {
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--foreground) 9%, transparent) 1px,
+    transparent 0
+  );
+  background-size: 10px 10px;
+}
+
+@utility stripe-divider {
+  @apply relative h-8;
+  &:before {
+    content: "";
+    @apply diagonal-stripes absolute left-[-100vw] -z-1 h-full w-[200vw];
+  }
+}
+
+@keyframes flip-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* shiki dual themes */
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}
+
+/* intro loader */
+[data-intro-seen] .intro-loader {
+  display: none;
+}
+
+@keyframes intro-in {
+  from {
+    transform: translateY(110%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes intro-cycle {
+  0% {
+    transform: translateY(110%);
+  }
+  35%,
+  70% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-110%);
   }
 }

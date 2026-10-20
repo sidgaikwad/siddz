@@ -1,11 +1,12 @@
 // Brand identity for this app: the single source a fork edits to rebrand. web reads it via lib/config.ts.
 export const site = {
-  name: "Portfolio",
-  description: "Portfolio is just getting started. Tell its story here.",
-  tagline: "Your tagline, ready when you are.",
+  name: "Siddharth Gaikwad",
+  description:
+    "Full stack engineer from Mumbai building developer tools with TypeScript, React, Node.js, Rust and Go.",
+  tagline: "Full Stack Engineer",
   social: {
     discord: "",
-    github: "",
+    github: "https://github.com/sidgaikwad",
     x: "",
   },
   // Local-only dev agent identity (api/hono agents router).

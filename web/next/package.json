@@ -16,6 +16,8 @@
     "@packages/auth": "workspace:*",
     "@packages/config": "workspace:*",
     "@packages/env": "workspace:*",
+    "@react-three/drei": "catalog:",
+    "@react-three/fiber": "catalog:",
     "@remixicon/react": "catalog:",
     "@shadcn/react": "catalog:",
     "@tanstack/react-form": "catalog:",
@@ -46,6 +48,7 @@
     "recharts": "catalog:",
     "shiki": "catalog:",
     "takumi-js": "catalog:",
+    "three": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -57,6 +60,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@types/three": "catalog:",
     "babel-plugin-react-compiler": "catalog:",
     "portless": "catalog:",
     "shadcn": "catalog:",

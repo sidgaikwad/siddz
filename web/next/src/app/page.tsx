@@ -1,15 +1,55 @@
-import { features, site } from "@packages/config/site"
-import { redirect } from "next/navigation"
+import { IntroLoader } from "@/components/sidd-ui/intro-loader"
+import { GitHubContributions } from "@/features/portfolio/components/github-contributions"
+import { Overview, SocialLinks } from "@/features/portfolio/components/overview"
+import { Separator } from "@/features/portfolio/components/panel"
+import { ProfileHeader } from "@/features/portfolio/components/profile-header"
+import { Projects } from "@/features/portfolio/components/projects"
+import {
+  About,
+  BlogPreview,
+  ComponentsPreview,
+  Education,
+  Experiences,
+  Footer,
+  TechStack,
+} from "@/features/portfolio/components/sections"
 
-// Fresh fork: the waitlist capture when the waitlist feature is on, otherwise a plain landing page. Replace this with your real home when ready.
 export default function Home() {
-  if (features.waitlist) redirect("/waitlist")
-
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center p-8 text-center">
-      <div className="mx-auto flex w-full max-w-xl flex-col items-center">
-        <h1 className="mb-4 text-5xl font-bold tracking-tight sm:text-6xl">{site.name}</h1>
-        <p className="text-muted-foreground max-w-md text-lg">{site.tagline}</p>
+    <main className="max-w-screen overflow-x-clip px-2 pt-14">
+      <IntroLoader />
+      <div className="mx-auto md:max-w-3xl [&_[data-slot=panel]]:scroll-mt-22">
+        <Separator />
+        <ProfileHeader />
+        <Separator />
+
+        <Overview />
+        <SocialLinks />
+        <GitHubContributions />
+        <Separator />
+
+        <About />
+        <Separator />
+
+        <ComponentsPreview />
+        <Separator />
+
+        <TechStack />
+        <Separator />
+
+        <Experiences />
+        <Separator />
+
+        <Education />
+        <Separator />
+
+        <Projects />
+        <Separator />
+
+        <BlogPreview />
+        <Separator />
+
+        <Footer />
       </div>
     </main>
   )
