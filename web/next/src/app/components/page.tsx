@@ -2,8 +2,8 @@ import type { Metadata } from "next"
 import Link from "next/link"
 
 import { COMPONENTS } from "@/features/components-showcase/registry"
+import { Footer } from "@/features/portfolio/components/footer"
 import { Panel, Separator } from "@/features/portfolio/components/panel"
-import { Footer } from "@/features/portfolio/components/sections"
 import { Tag } from "@/features/portfolio/components/tag"
 
 export const metadata: Metadata = {

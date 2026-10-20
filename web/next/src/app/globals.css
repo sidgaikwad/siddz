@@ -223,25 +223,13 @@
   background-color: var(--shiki-dark-bg) !important;
 }
 
-/* intro loader */
-@keyframes intro-in {
+@keyframes term-in {
   from {
-    transform: translateY(110%);
+    opacity: 0;
+    transform: translateY(3px);
   }
   to {
+    opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes intro-cycle {
-  0% {
-    transform: translateY(110%);
-  }
-  35%,
-  70% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(-110%);
   }
 }

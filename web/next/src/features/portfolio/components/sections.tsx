@@ -193,31 +193,3 @@ export function BlogPreview() {
     </Panel>
   )
 }
-
-export function Footer() {
-  return (
-    <footer className="screen-line-top border-line text-muted-foreground border-x px-4 py-6 text-center text-sm">
-      <p>
-        Built by {PROFILE.name} on{" "}
-        <a
-          href="https://zerostarter.dev"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-foreground underline underline-offset-3"
-        >
-          ZeroStarter
-        </a>
-        . Design inspired by{" "}
-        <a
-          href="https://chanhdai.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-foreground underline underline-offset-3"
-        >
-          chanhdai.com
-        </a>
-        .
-      </p>
-    </footer>
-  )
-}

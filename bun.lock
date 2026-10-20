@@ -137,11 +137,12 @@
       "dependencies": {
         "@api/hono": "workspace:*",
         "@base-ui/react": "catalog:",
+        "@gsap/react": "^2.1.2",
         "@packages/auth": "workspace:*",
         "@packages/config": "workspace:*",
         "@packages/env": "workspace:*",
-        "@react-three/drei": "^10.7.9",
-        "@react-three/fiber": "^9.8.2",
+        "@react-three/drei": "catalog:",
+        "@react-three/fiber": "catalog:",
         "@remixicon/react": "catalog:",
         "@shadcn/react": "catalog:",
         "@tanstack/react-form": "catalog:",
@@ -158,6 +159,7 @@
         "fumadocs-core": "catalog:",
         "fumadocs-mdx": "catalog:",
         "fumadocs-ui": "catalog:",
+        "gsap": "^3.15.0",
         "hono": "catalog:",
         "input-otp": "catalog:",
         "nanoid": "catalog:",
@@ -172,7 +174,7 @@
         "recharts": "catalog:",
         "shiki": "catalog:",
         "takumi-js": "catalog:",
-        "three": "^0.186.1",
+        "three": "catalog:",
         "zod": "catalog:",
       },
       "devDependencies": {
@@ -184,7 +186,7 @@
         "@types/node": "catalog:",
         "@types/react": "catalog:",
         "@types/react-dom": "catalog:",
-        "@types/three": "^0.186.0",
+        "@types/three": "catalog:",
         "babel-plugin-react-compiler": "catalog:",
         "portless": "catalog:",
         "shadcn": "catalog:",
@@ -216,6 +218,8 @@
     "@hono/node-server": "^2.1.4",
     "@hono/standard-validator": "^0.4.0",
     "@octokit/rest": "^22.0.1",
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
     "@remixicon/react": "^4.9.0",
     "@scalar/hono-api-reference": "^0.12.11",
     "@shadcn/react": "^0.3.1",
@@ -240,6 +244,7 @@
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.186.0",
     "@types/ws": "^8.18.2",
     "@vercel/speed-insights": "^2.0.0",
     "@viz-js/viz": "^3.31.0",
@@ -287,6 +292,7 @@
     "svgo": "^4.1.0",
     "tailwindcss": "^4.3.3",
     "takumi-js": "^2.14.0",
+    "three": "^0.186.1",
     "tldts": "^7.4.18",
     "ts-morph": "^28.0.0",
     "tsdown": "^0.23.1",
@@ -529,6 +535,8 @@
     "@fumadocs/tailwind": ["@fumadocs/tailwind@0.1.4", "", { "peerDependencies": { "tailwindcss": "^4.0.0" }, "optionalPeers": ["tailwindcss"] }, "sha512-1LAmuroJ6TJoQodyODRhMC9ThAkfrV2N5vZjaj4KKs+dpF2bs0d/2z0604iMKBLv2BKstR7zE9TUa/L0pxGnhA=="],
 
     "@fumari/image-size": ["@fumari/image-size@0.1.1", "", {}, "sha512-iaiV2wyzJ4mW358NX4CX3yGit+WjKYzpaQ+rldK9BjL/5jFpeV6ruWnZVq7MEyMn3Gd0DLi8g/79NZAAQaGscw=="],
+
+    "@gsap/react": ["@gsap/react@2.1.2", "", { "peerDependencies": { "gsap": "^3.12.5", "react": ">=17" } }, "sha512-JqliybO1837UcgH2hVOM4VO+38APk3ECNrsuSM4MuXp+rbf+/2IG2K1YJiqfTcXQHH7XlA0m3ykniFYstfq0Iw=="],
 
     "@hono/node-server": ["@hono/node-server@2.1.5", "", { "peerDependencies": { "hono": "^4 || ^5.0.0-0" } }, "sha512-MgP/I06GdvsilDspMk/qmRzpk8LOUStP6jFAbSRi40W09DhoyUn+Mj7eyKICPqeYKybOjVFLVIAQzvu1bfIa7Q=="],
 
@@ -1621,6 +1629,8 @@
     "gopd": ["gopd@1.2.0", "", {}, "sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg=="],
 
     "graceful-fs": ["graceful-fs@4.2.11", "", {}, "sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ=="],
+
+    "gsap": ["gsap@3.15.0", "", {}, "sha512-dMW4CWBTUK1AEEDeZc1g4xpPGIrSf9fJF960qbTZmN/QwZIWY5wgliS6JWl9/25fpTGJrMRtSjGtOmPnfjZB+A=="],
 
     "has-symbols": ["has-symbols@1.1.0", "", {}, "sha512-1cDNdwJ2Jaohmb3sg4OmKaMBwuC48sYni5HUw2DvsC8LjGTLK9h+eb1X6RyuOHe4hT0ULCW68iomhjUoKUqlPQ=="],
 

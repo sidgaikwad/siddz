@@ -1,16 +1,16 @@
 import { IntroLoader } from "@/components/sidd-ui/intro-loader"
+import { Footer } from "@/features/portfolio/components/footer"
 import { GitHubContributions } from "@/features/portfolio/components/github-contributions"
 import { Overview, SocialLinks } from "@/features/portfolio/components/overview"
 import { Separator } from "@/features/portfolio/components/panel"
 import { ProfileHeader } from "@/features/portfolio/components/profile-header"
-import { Projects } from "@/features/portfolio/components/projects"
+import { ProjectsTerminal } from "@/features/portfolio/components/projects-terminal"
 import {
   About,
   BlogPreview,
   ComponentsPreview,
   Education,
   Experiences,
-  Footer,
   TechStack,
 } from "@/features/portfolio/components/sections"
 
@@ -43,7 +43,7 @@ export default function Home() {
         <Education />
         <Separator />
 
-        <Projects />
+        <ProjectsTerminal />
         <Separator />
 
         <BlogPreview />

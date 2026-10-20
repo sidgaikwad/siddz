@@ -3,6 +3,8 @@
 import dynamic from "next/dynamic"
 import { useState } from "react"
 
+import { DotMatrixWordmark } from "@/components/sidd-ui/dot-matrix-wordmark"
+import { Garden } from "@/components/sidd-ui/garden"
 import type { SkylineDay } from "@/components/sidd-ui/github-skyline"
 import { IntroLoader } from "@/components/sidd-ui/intro-loader"
 import { IsometricMark } from "@/components/sidd-ui/isometric-mark"
@@ -185,4 +187,12 @@ export function IntroLoaderDemo() {
 
 export function IsometricMarkDemo() {
   return <IsometricMark text="SIDDZ" className="max-w-sm" />
+}
+
+export function GardenDemo() {
+  return <Garden height={140} className="self-end" />
+}
+
+export function DotMatrixWordmarkDemo() {
+  return <DotMatrixWordmark text="SIDDZ" gap={6} className="w-full" />
 }

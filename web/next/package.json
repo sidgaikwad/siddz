@@ -13,6 +13,7 @@
   "dependencies": {
     "@api/hono": "workspace:*",
     "@base-ui/react": "catalog:",
+    "@gsap/react": "catalog:",
     "@packages/auth": "workspace:*",
     "@packages/config": "workspace:*",
     "@packages/env": "workspace:*",
@@ -34,6 +35,7 @@
     "fumadocs-core": "catalog:",
     "fumadocs-mdx": "catalog:",
     "fumadocs-ui": "catalog:",
+    "gsap": "catalog:",
     "hono": "catalog:",
     "input-otp": "catalog:",
     "nanoid": "catalog:",

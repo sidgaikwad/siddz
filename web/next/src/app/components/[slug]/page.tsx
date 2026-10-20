@@ -12,8 +12,8 @@ import { CopyPageButton } from "@/features/components-showcase/copy-page-button"
 import { PageToc } from "@/features/components-showcase/page-toc"
 import { PreviewTabs } from "@/features/components-showcase/preview-tabs"
 import { COMPONENTS, getComponent, getNeighbors } from "@/features/components-showcase/registry"
+import { Footer } from "@/features/portfolio/components/footer"
 import { Panel, PanelContent, Separator } from "@/features/portfolio/components/panel"
-import { Footer } from "@/features/portfolio/components/sections"
 import { Tag } from "@/features/portfolio/components/tag"
 
 const SECTIONS = [

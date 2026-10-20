@@ -1,4 +1,6 @@
 import {
+  DotMatrixWordmarkDemo,
+  GardenDemo,
   GitHubSkylineDemo,
   IntroLoaderDemo,
   IsometricMarkDemo,
@@ -133,22 +135,63 @@ export const COMPONENTS: ShowcaseItem[] = [
     slug: "intro-loader",
     name: "Intro Loader",
     description:
-      "A full-screen intro: greetings slide through a mask, a counter climbs to 100, then the curtain lifts with a curved edge.",
+      "A full-screen kinetic intro: 3D flipping greetings, a name that flies in from depth, decoding status text, then lifting shutters.",
     file: "intro-loader.tsx",
     tags: ["animation", "page"],
     usage: `<IntroLoader words={["Hello", "Bonjour"]} finale="Your Name" />`,
     features: [
-      "Words rise into a masked line and leave upward, timed back to back.",
-      "Counter and progress line climb together on an ease-out curve.",
-      "Curtain lifts with a curved trailing edge, content drifts up as it fades.",
-      "Plays on every fresh page load, but not when you navigate back to the page inside the site.",
-      "Skipped entirely with reduced motion.",
+      "One GSAP timeline drives everything, so every beat lands on the same clock and Skip jumps straight to the end.",
+      "Greeting letters roll in and out on 3D cube flips (rotateX around a point behind each glyph) with blur and stagger.",
+      "Stacked text-shadows extrude the letters into solid 3D type without WebGL.",
+      "The name flies in from deep Z with random tilt per letter; the tagline and a status line decode with ScrambleText.",
+      "Six shutters lift from the centre out to reveal the page. Plays per fresh load, skipped for reduced motion.",
     ],
     story: [
       "I kept coming back to studio sites whose intros felt like the opening of a film. I wanted that first second on my site to feel intentional too.",
       "The greetings are the languages I hear around me: Hindi at home in Mumbai, Japanese from the course I am building, and a few more. It ends on my name.",
     ],
     Demo: IntroLoaderDemo,
+  },
+  {
+    slug: "dot-matrix-wordmark",
+    name: "Dot Matrix Wordmark",
+    description:
+      "A full-bleed footer wordmark drawn as a field of dots sampled from real type. Dots sweep in on reveal and swell under your cursor.",
+    file: "dot-matrix-wordmark.tsx",
+    tags: ["canvas", "interaction", "footer"],
+    usage: `<DotMatrixWordmark text="SIDDHARTH" gap={7} crop={0.78} />`,
+    features: [
+      "Text is rasterised once off screen at the exact width, then sampled onto a dot grid, so it fits any viewport edge to edge.",
+      "Dots sweep in left to right with a little jitter the first time the footer scrolls into view.",
+      "A smoothed spotlight follows the pointer: nearby dots grow and brighten, everything else stays quiet.",
+      "Cropped by the bottom edge with a fade mask, the detail most big-wordmark footers skip.",
+      "Follows the theme colour, pauses off screen and respects reduced motion.",
+    ],
+    story: [
+      "Big edge-to-edge wordmarks are everywhere in footers right now, and most are just huge text. I wanted mine to belong to this site, which is built out of dot grids and thin lines.",
+      "Sampling the letters into dots made the name feel like part of the background pattern, and the cursor spotlight gives you a reason to linger at the bottom of the page.",
+    ],
+    Demo: DotMatrixWordmarkDemo,
+  },
+  {
+    slug: "garden",
+    name: "Garden",
+    description:
+      "A living strip of grass and wildflowers drawn on canvas. It sways in the wind and parts around your cursor.",
+    file: "garden.tsx",
+    tags: ["canvas", "interaction"],
+    usage: `<Garden height={130} />`,
+    features: [
+      "Every blade and flower is generated procedurally on a 2D canvas, so there are no images to load.",
+      "Two layers of grass with flowers between them give the strip depth.",
+      "Layered sine waves make a wind that never quite repeats; blades near the cursor bend away.",
+      "Pauses when off screen, caps the pixel ratio at 2, and draws a still frame for reduced motion.",
+    ],
+    story: [
+      "I saw a directory site that ended in a strip of wildflowers and it made the bottom of the page feel like somewhere you arrive, not where the content runs out.",
+      "I wanted that for my footer, under my name, but alive and reacting to you instead of a static image.",
+    ],
+    Demo: GardenDemo,
   },
   {
     slug: "terminal",

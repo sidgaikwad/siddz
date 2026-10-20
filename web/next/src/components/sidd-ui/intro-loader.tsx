@@ -1,135 +1,348 @@
 "use client"
 
+import { useGSAP } from "@gsap/react"
 import { cn } from "cn"
-import { useEffect, useState } from "react"
+import { gsap } from "gsap"
+import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin"
+import { useRef, useState } from "react"
+
+gsap.registerPlugin(useGSAP, ScrambleTextPlugin)
 
 // Set once the intro has finished, so client-side navigation back to the page does not replay it. A full reload resets it.
 let playedThisLoad = false
 
-const WORD_MS = 260
-const FIRST_WORD_MS = 650
-const FINAL_HOLD_MS = 700
-const EXIT_MS = 900
+const SHUTTERS = 6
+const STATUSES = ["booting", "resolving deps", "compiling shaders", "hydrating", "ready"]
+const EXTRUDE =
+  "0 0.02em 0 #d4d4d8, 0 0.04em 0 #a1a1aa, 0 0.06em 0 #71717a, 0 0.08em 0 #52525b, 0 0.1em 0 #3f3f46, 0 0.12em 0 #27272a, 0 0.22em 0.3em rgba(0,0,0,0.75)"
+
+const isLatin = (s: string) => /^[\p{Script=Latin}\s'.!-]+$/u.test(s)
+
+function Chars({ text }: { text: string }) {
+  // Non-Latin scripts animate as one unit so conjuncts and combining marks keep their shaping.
+  const parts = isLatin(text) ? [...text.toUpperCase()] : [text]
+  return (
+    <span
+      className="absolute inset-0 flex items-center justify-center"
+      style={{ perspective: "800px" }}
+    >
+      {parts.map((c, i) => (
+        <span
+          key={i}
+          data-char
+          className="inline-block [transform-origin:50%_50%_-0.45em] will-change-transform [transform-style:preserve-3d]"
+          style={{ textShadow: EXTRUDE }}
+        >
+          {c === " " ? " " : c}
+        </span>
+      ))}
+    </span>
+  )
+}
 
 export function IntroLoader({
   words = ["Hello", "नमस्ते", "こんにちは", "Bonjour", "Hola", "Ciao"],
-  finale = "Siddharth Gaikwad",
+  finale = "Siddharth",
+  tagline = "Full Stack Engineer",
   oncePerLoad = true,
 }: {
   words?: string[]
   finale?: string
+  tagline?: string
   oncePerLoad?: boolean
 }) {
-  const sequence = [...words, finale]
-  const [index, setIndex] = useState(0)
-  const [progress, setProgress] = useState(0)
-  const [exiting, setExiting] = useState(false)
+  const root = useRef<HTMLDivElement>(null)
+  const tl = useRef<gsap.core.Timeline | null>(null)
   const [done, setDone] = useState(
     () => oncePerLoad && typeof window !== "undefined" && playedThisLoad,
   )
 
-  useEffect(() => {
-    if (done) return
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    if (reduced) {
-      setDone(true)
-      return
-    }
-
-    document.documentElement.style.overflow = "hidden"
-    const timers: ReturnType<typeof setTimeout>[] = []
-    let t = FIRST_WORD_MS
-    for (let i = 1; i < sequence.length; i++) {
-      timers.push(setTimeout(() => setIndex(i), t))
-      t += WORD_MS
-    }
-    const total = t + FINAL_HOLD_MS
-    const start = performance.now()
-    let frame = requestAnimationFrame(function tick(now) {
-      const p = Math.min(1, (now - start) / total)
-      setProgress(Math.round((1 - Math.pow(1 - p, 2)) * 100))
-      if (p < 1) frame = requestAnimationFrame(tick)
-    })
-    timers.push(setTimeout(() => setExiting(true), total))
-    timers.push(
-      setTimeout(() => {
+  useGSAP(
+    () => {
+      if (done || !root.current) return
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         setDone(true)
+        return
+      }
+      const q = gsap.utils.selector(root)
+      const counter = { v: 0 }
+      const counterEl = q("[data-counter]")[0] as HTMLElement
+      const finish = () => {
         document.documentElement.style.overflow = ""
         if (oncePerLoad) playedThisLoad = true
-      }, total + EXIT_MS),
-    )
-    return () => {
-      timers.forEach(clearTimeout)
-      cancelAnimationFrame(frame)
-      document.documentElement.style.overflow = ""
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+        setDone(true)
+      }
+
+      document.documentElement.style.overflow = "hidden"
+      const t = gsap.timeline({ defaults: { ease: "power3.out" }, onComplete: finish })
+      tl.current = t
+
+      t.from(q("[data-frame-item]"), { opacity: 0, y: 6, duration: 0.4, stagger: 0.04 }, 0)
+        .from(q("[data-guide-x]"), { scaleX: 0, duration: 0.7, ease: "expo.out" }, 0)
+        .from(q("[data-guide-y]"), { scaleY: 0, duration: 0.7, ease: "expo.out" }, 0)
+        .from(q("[data-ring]"), { scale: 0.6, opacity: 0, duration: 0.9, ease: "expo.out" }, 0)
+
+      // Greetings: each letter rolls in on a 3D cube flip, then rolls out upward as the next word lands.
+      let at = 0.2
+      const words = q("[data-word]")
+      words.forEach((word, i) => {
+        const chars = word.querySelectorAll("[data-char]")
+        const hold = i === 0 ? 0.5 : 0.3
+        t.set(word, { opacity: 1 }, at)
+          .fromTo(
+            chars,
+            { rotateX: -100, yPercent: 70, z: -120, opacity: 0, filter: "blur(8px)" },
+            {
+              rotateX: 0,
+              yPercent: 0,
+              z: 0,
+              opacity: 1,
+              filter: "blur(0px)",
+              duration: 0.34,
+              stagger: 0.022,
+            },
+            at,
+          )
+          .to(
+            chars,
+            {
+              rotateX: 100,
+              yPercent: -70,
+              z: -120,
+              opacity: 0,
+              filter: "blur(8px)",
+              duration: 0.24,
+              ease: "power3.in",
+              stagger: 0.016,
+            },
+            at + hold,
+          )
+        at += hold + 0.08
+      })
+
+      // Finale: the name flies in from deep space letter by letter and settles extruded.
+      const nameChars = q("[data-finale] [data-char]")
+      t.set(q("[data-finale]"), { opacity: 1 }, at)
+        .fromTo(
+          nameChars,
+          {
+            z: -900,
+            rotateY: () => gsap.utils.random(-75, 75),
+            rotateX: () => gsap.utils.random(-40, 40),
+            yPercent: () => gsap.utils.random(-60, 60),
+            opacity: 0,
+            filter: "blur(14px)",
+          },
+          {
+            z: 0,
+            rotateY: 0,
+            rotateX: 0,
+            yPercent: 0,
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 0.9,
+            ease: "expo.out",
+            stagger: { each: 0.045, from: "center" },
+          },
+          at,
+        )
+        .set(q("[data-tagline]"), { opacity: 1 }, at + 0.45)
+        .to(
+          q("[data-tagline]"),
+          {
+            duration: 0.6,
+            scrambleText: { text: tagline.toUpperCase(), chars: "upperCase", speed: 0.6 },
+            ease: "none",
+          },
+          at + 0.45,
+        )
+        .to(q("[data-finale]"), { scale: 1.04, duration: 0.55, ease: "power2.inOut" }, at + 0.85)
+
+      const end = at + 1.4
+
+      // Something always moving: progress, counter, a rotating ring and a decoding status line.
+      t.to(q("[data-ring]"), { rotate: 140, duration: end + 0.8, ease: "none" }, 0)
+        .to(
+          counter,
+          {
+            v: 100,
+            duration: end,
+            ease: "power2.inOut",
+            onUpdate: () => {
+              counterEl.textContent = String(Math.round(counter.v)).padStart(3, "0")
+            },
+          },
+          0,
+        )
+        .fromTo(
+          q("[data-progress]"),
+          { scaleX: 0 },
+          { scaleX: 1, duration: end, ease: "power2.inOut" },
+          0,
+        )
+      STATUSES.forEach((s, i) => {
+        t.to(
+          q("[data-status]"),
+          { duration: 0.35, scrambleText: { text: s, chars: "lowerCase", speed: 1 }, ease: "none" },
+          (end / STATUSES.length) * i,
+        )
+      })
+
+      // Exit: content dissolves while the shutters lift from the centre out.
+      t.to(
+        q("[data-content]"),
+        { opacity: 0, scale: 0.92, filter: "blur(10px)", duration: 0.45, ease: "power2.in" },
+        end,
+      )
+        .to(q("[data-frame]"), { opacity: 0, duration: 0.3 }, end)
+        .to(
+          q("[data-shutter]"),
+          {
+            yPercent: -100,
+            duration: 0.8,
+            ease: "expo.inOut",
+            stagger: { each: 0.06, from: "center" },
+          },
+          end + 0.1,
+        )
+
+      return () => {
+        document.documentElement.style.overflow = ""
+      }
+    },
+    { scope: root, dependencies: [done] },
+  )
 
   if (done) return null
 
-  const isFinale = index === sequence.length - 1
+  const skip = () => tl.current?.progress(1)
 
   return (
-    <>
-      <div
-        aria-hidden
-        className={cn(
-          "intro-loader fixed inset-0 z-[100] flex flex-col bg-zinc-950 text-zinc-50 transition-transform ease-[cubic-bezier(0.76,0,0.24,1)] motion-reduce:hidden",
-          exiting && "-translate-y-full",
-        )}
-        style={{ transitionDuration: `${EXIT_MS}ms` }}
-      >
+    <div
+      ref={root}
+      aria-hidden
+      className="intro-loader fixed inset-0 z-[100] overflow-hidden text-zinc-50 motion-reduce:hidden"
+    >
+      <div className="absolute inset-0 flex">
+        {Array.from({ length: SHUTTERS }, (_, i) => (
+          <div key={i} data-shutter className="-mr-px h-full flex-1 bg-zinc-950" />
+        ))}
+      </div>
+
+      <div data-content className="absolute inset-0">
+        <div className="absolute inset-0 [background-image:radial-gradient(rgba(255,255,255,0.07)_1px,transparent_0)] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_75%)] [background-size:12px_12px]" />
         <div
-          className={cn(
-            "flex flex-1 items-center justify-center transition-all duration-500",
-            exiting && "-translate-y-24 opacity-0",
-          )}
-        >
-          <div className="flex items-center gap-4">
-            <span
-              className={cn(
-                "size-2.5 rounded-full bg-zinc-50 transition-opacity",
-                isFinale && "opacity-0",
-              )}
+          data-guide-x
+          className="absolute inset-x-0 top-1/2 h-px bg-[repeating-linear-gradient(90deg,rgba(255,255,255,0.2)_0_4px,transparent_4px_8px)]"
+        />
+        <div
+          data-guide-y
+          className="absolute inset-y-0 left-1/2 w-px bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.2)_0_4px,transparent_4px_8px)]"
+        />
+        <div className="absolute top-1/2 left-1/2 size-[78vmin] -translate-x-1/2 -translate-y-1/2">
+          <svg data-ring className="size-full" viewBox="0 0 100 100" fill="none">
+            <circle
+              cx="50"
+              cy="50"
+              r="49"
+              stroke="rgba(255,255,255,0.16)"
+              strokeWidth="0.15"
+              strokeDasharray="0.8 1.2"
             />
-            <div className="h-[1.15em] overflow-hidden text-5xl font-medium tracking-tight sm:text-7xl">
-              <span
-                key={index}
-                className={cn(
-                  "block leading-[1.15]",
-                  isFinale
-                    ? "animate-[intro-in_700ms_cubic-bezier(0.22,1,0.36,1)_both]"
-                    : index === 0
-                      ? "animate-[intro-in_500ms_cubic-bezier(0.22,1,0.36,1)_both]"
-                      : "animate-[intro-cycle_260ms_cubic-bezier(0.65,0,0.35,1)_both]",
-                )}
-              >
-                {sequence[index]}
-              </span>
-            </div>
+            <circle cx="50" cy="50" r="41" stroke="rgba(255,255,255,0.08)" strokeWidth="0.12" />
+            {Array.from({ length: 4 }, (_, i) => (
+              <rect
+                key={i}
+                x="49.6"
+                y="0.2"
+                width="0.8"
+                height="3"
+                fill="rgba(255,255,255,0.55)"
+                transform={`rotate(${i * 90} 50 50)`}
+              />
+            ))}
+          </svg>
+        </div>
+
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="relative h-[1.3em] w-full text-[clamp(3rem,11vw,8.5rem)] leading-none font-bold tracking-tight">
+            {words.map((w) => (
+              <div key={w} data-word className="absolute inset-0 opacity-0">
+                <Chars text={w} />
+              </div>
+            ))}
           </div>
         </div>
-        <div className="flex items-end justify-between p-6 font-mono text-xs text-zinc-500 sm:p-10">
-          <span className="tracking-widest uppercase">Full Stack Engineer · Mumbai</span>
-          <span className="text-5xl font-light text-zinc-50 tabular-nums sm:text-7xl">
-            {progress}
+
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-5">
+          <div
+            data-finale
+            className="relative h-[1.2em] w-full text-[clamp(3.5rem,15vw,12rem)] leading-none font-black tracking-tighter opacity-0"
+          >
+            <Chars text={finale} />
+          </div>
+          <p
+            data-tagline
+            className="h-4 font-mono text-xs tracking-[0.35em] text-zinc-400 opacity-0 sm:text-sm"
+          >
+            &nbsp;
+          </p>
+        </div>
+      </div>
+
+      <div
+        data-frame
+        className="pointer-events-none absolute inset-0 font-mono text-[11px] tracking-widest text-zinc-500 uppercase"
+      >
+        <span
+          data-frame-item
+          className="absolute top-5 left-5 size-4 border-t border-l border-zinc-500"
+        />
+        <span
+          data-frame-item
+          className="absolute top-5 right-5 size-4 border-t border-r border-zinc-500"
+        />
+        <span
+          data-frame-item
+          className="absolute bottom-5 left-5 size-4 border-b border-l border-zinc-500"
+        />
+        <span
+          data-frame-item
+          className="absolute right-5 bottom-5 size-4 border-r border-b border-zinc-500"
+        />
+        <div className="absolute inset-x-12 top-5 flex items-center justify-between">
+          <span data-frame-item>Siddharth Gaikwad / Portfolio</span>
+          <button
+            data-frame-item
+            type="button"
+            onClick={skip}
+            className="pointer-events-auto rounded-full border border-zinc-700 px-3 py-1 text-zinc-300 transition-colors hover:border-zinc-300 hover:text-white"
+          >
+            Skip
+          </button>
+        </div>
+        <div className="absolute inset-x-12 bottom-6 flex items-end justify-between gap-6">
+          <div data-frame-item className="space-y-1.5">
+            <p className="flex items-center gap-2">
+              <span className="size-1.5 animate-pulse rounded-full bg-emerald-400" />
+              <span data-status className="text-zinc-300 normal-case">
+                booting
+              </span>
+            </p>
+            <p>Mumbai · India</p>
+          </div>
+          <span
+            data-frame-item
+            data-counter
+            className="text-6xl leading-none font-light tracking-tight text-zinc-50 tabular-nums sm:text-8xl"
+          >
+            000
           </span>
         </div>
-        <div className="h-px bg-zinc-800">
-          <div
-            className="h-full bg-zinc-50 transition-[width] duration-100"
-            style={{ width: `${progress}%` }}
-          />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-zinc-800">
+          <div data-progress className="h-full origin-left bg-zinc-50" />
         </div>
-        <div
-          className={cn(
-            "absolute inset-x-0 top-full h-[14vh] scale-y-0 rounded-b-[50%] bg-zinc-950 transition-transform ease-[cubic-bezier(0.76,0,0.24,1)]",
-            exiting && "scale-y-100",
-          )}
-          style={{ transitionDuration: `${EXIT_MS}ms`, transformOrigin: "top" }}
-        />
       </div>
-    </>
+    </div>
   )
 }
